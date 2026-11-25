@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Saffron Hearth — Bistro Kitchen</title>
+<style>
+:root{--bg:#1c1512;--wall:#2b201a;--tile:#352720;--wood:#6b442a;--wood2:#4d2f1c;--copper:#c9733c;--gold:#f0b849;--cream:#faf1df;--ink:#231812;--green:#4ea864;--red:#d94b43;--panel:#251b16}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+body{background:var(--bg);color:var(--cream);font-family:system-ui,-apple-system,Segoe UI,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+header{height:58px;background:linear-gradient(180deg,#2d1f18,#1f1510);border-bottom:2px solid #4a3326;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:14px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f7cb67,#c9692c);border:2px solid #f7d98c;display:grid;place-items:center;font-weight:900;color:#2b1608;font-family:Georgia,serif;font-size:18px;box-shadow:0 0 12px rgba(240,184,73,.35)}
+.brand h1{font-family:Georgia,serif;font-size:20px;letter-spacing:.5px;color:#f7d98c}
+.brand small{display:block;font-size:11px;color:#b99d88;letter-spacing:.8px;text-transform:uppercase}
+.hud{display:flex;align-items:center;gap:12px}
+.stat{background:#18110e;border:1px solid #463125;border-radius:10px;padding:5px 12px;text-align:center;min-width:86px}
+.stat label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#b49884}
+.stat strong{font-size:18px;font-variant-numeric:tabular-nums;color:#fff4dc}
+.timer-box{border-color:#c9733c;background:linear-gradient(180deg,#2f1c12,#1c110c);min-width:110px}
+.timer-box strong{color:#f7c552;font-size:21px}
+.timer-box.low strong{color:#ff6b63;animation:pulse .7s infinite}
+.hud-btns{display:flex;gap:8px}
+button{font:inherit;cursor:pointer;border:none;border-radius:8px;transition:transform .08s,filter .12s}
+button:active{transform:scale(.96)}
+.btn-top{background:#3a281e;color:#f5e4cd;border:1px solid #5e4232;padding:7px 12px;font-size:12px;font-weight:600}
+.btn-top:hover{filter:brightness(1.15)}
+main{flex:1;display:grid;grid-template-rows:190px 1fr;min-height:0}
+.backsplash{position:relative;background:repeating-linear-gradient(90deg,transparent 0 64px,rgba(0,0,0,.18) 64px 66px),repeating-linear-gradient(0deg,transparent 0 32px,rgba(0,0,0,.18) 32px 34px),linear-gradient(180deg,#33241d,#261a14);border-bottom:6px solid #18100c;padding:12px 18px;display:flex;flex-direction:column;gap:8px}
+.rail{height:10px;background:linear-gradient(180deg,#e09a58,#8f4a20);border-radius:5px;box-shadow:0 3px 6px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.rail-tag{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#2b1508;background:#f2c166;padding:1px 8px;border-radius:4px}
+.orders{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:1;min-height:0;padding-top:2px}
+.ticket{background:linear-gradient(180deg,#fffaf0,#f3e5c8);color:var(--ink);border-radius:4px 4px 8px 8px;padding:9px 11px;box-shadow:0 6px 14px rgba(0,0,0,.42);display:flex;flex-direction:column;justify-content:space-between;position:relative;border-top:5px solid #c9733c}
+.ticket.matched{outline:3px solid var(--green);box-shadow:0 0 18px rgba(78,168,100,.55)}
+.ticket::before{content:"";position:absolute;top:-11px;left:50%;transform:translateX(-50%);width:22px;height:10px;background:#b9b1a5;border:1px solid #595248;border-radius:3px}
+.t-head{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.t-head h3{font-family:Georgia,serif;font-size:14px;line-height:1.1}
+.t-price{font-size:12px;font-weight:800;color:#8a4318;background:#f2d7a4;padding:1px 6px;border-radius:10px}
+.t-list{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0}
+.chip{font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;background:#e4d3b3;color:#3b291d;border:1px solid #cbb48e}
+.chip.done{background:#ccebd3;color:#1d5c2d;border-color:#74bd85}
+.bar{height:7px;background:#d8c7a7;border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--green);transition:width .2s linear}
+.bar>i.warn{background:#e69b2e}
+.bar>i.crit{background:var(--red)}
+.counter{background:linear-gradient(180deg,#7c5033 0,#5e3a23 14px,#452918 100%);padding:14px 18px;display:grid;grid-template-columns:1.12fr 1.28fr .92fr;gap:16px;min-height:0}
+.station{background:rgba(24,15,10,.56);border:1px solid #754e35;border-radius:14px;padding:12px;display:flex;flex-direction:column;min-height:0;position:relative;box-shadow:inset 0 1px 0 rgba(255,230,190,.12)}
+.st-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#f2c97d}
+.st-title span{font-size:11px;color:#c7ac95;font-weight:500;text-transform:none}
+.bins{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;flex:1;align-content:start}
+.bin{background:linear-gradient(180deg,#3c291f,#2a1c15);border:1px solid #6b4935;border-radius:10px;padding:8px 9px;color:var(--cream);display:flex;align-items:center;gap:9px;text-align:left;position:relative}
+.bin:hover{border-color:#f0b849;background:linear-gradient(180deg,#4a3326,#322118)}
+.key{position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;background:#1a110c;color:#f0b849;border:1px solid #5c3f2e;border-radius:4px;padding:1px 5px}
+.icon{width:34px;height:28px;border-radius:7px;flex-shrink:0;position:relative;display:grid;place-items:center}
+.bin-info b{display:block;font-size:13px}
+.bin-info small{font-size:11px;color:#bea38d}
+.skillet-box{margin-top:8px;background:linear-gradient(180deg,#251914,#1a110d);border:1px solid #6b422a;border-radius:11px;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pan{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#4a433f,#1e1a18 68%,#b86532 72%,#783a16 100%);border:2px solid #d9884c;position:relative;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px rgba(230,104,36,.3)}
+.pan.hot{box-shadow:0 0 20px rgba(255,112,38,.7)}
+.pan::after{content:"";position:absolute;right:-14px;width:16px;height:8px;background:#b86532;border-radius:0 4px 4px 0}
+.sk-meta{flex:1}
+.sk-meta b{font-size:13px;color:#ffdca3;display:block}
+.sk-meta small{font-size:11px;color:#c7ab95;display:block;margin-bottom:5px}
+.sk-btn{background:linear-gradient(180deg,#d87836,#a44f1c);color:#fff;font-size:12px;font-weight:700;padding:7px 10px}
+.board-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:radial-gradient(circle at 50% 42%,#b68253,#8e5d34 70%,#6e4423);border:4px solid #4c2d17;border-radius:14px;padding:12px;position:relative;box-shadow:inset 0 0 18px rgba(0,0,0,.35)}
+.board-badge{background:rgba(28,17,11,.78);color:#f7d58b;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px}
+.dish-stage{flex:1;width:100%;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:2px;min-height:140px}
+.layer{width:154px;border-radius:12px;position:relative;box-shadow:0 3px 5px rgba(0,0,0,.35);animation:drop .16s ease-out}
+.l-bun{height:24px;background:linear-gradient(180deg,#e9ae58,#c47d2f);border-radius:26px 26px 9px 9px;border-bottom:3px solid #96571b}
+.l-bun::after{content:"•  •   •  •";position:absolute;top:2px;left:0;right:0;text-align:center;color:#fff3cf;font-size:9px;letter-spacing:3px}
+.l-flatbread{height:16px;width:170px;background:repeating-radial-gradient(circle at 25% 50%,#c99757 0 10px,#dfba7c 10px 22px);border:2px solid #9e6b32;border-radius:14px}
+.l-greens{height:15px;width:166px;background:linear-gradient(180deg,#68c768,#2d7d38);border-radius:40% 50% 35% 45%;border-bottom:2px solid #1e5725}
+.l-seared{height:22px;width:156px;background:repeating-linear-gradient(-35deg,#5a2c1c 0 12px,#3a190e 12px 16px);border:2px solid #2b1109;border-radius:11px}
+.l-tomato{height:13px;width:146px;background:linear-gradient(180deg,#f05344,#c42b1f);border-radius:8px;border:1px solid #ff8c7d}
+.l-cheddar{height:12px;width:162px;background:linear-gradient(180deg,#ffd44d,#e39a19);border-radius:4px 4px 12px 12px;transform:skewX(-6deg)}
+.l-sauce{height:11px;width:140px;background:linear-gradient(90deg,#f7a428,#ffd84d,#e68a1c);border-radius:20px;box-shadow:0 0 8px rgba(255,204,64,.55)}
+.l-raw{height:20px;width:44px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e0776b,#9e342c);border:2px solid #6b1d17}
+.l-cooked{height:24px;width:44px;border-radius:50%;background:repeating-linear-gradient(-35deg,#693421 0 7px,#38170d 7px 10px);border:2px solid #291008}
+.l-burnt{height:24px;width:44px;border-radius:50%;background:#1b1817;border:2px solid #4d4542}
+.board-tags{font-size:12px;color:#fff4dc;background:rgba(28,17,11,.72);padding:4px 10px;border-radius:8px;max-width:100%;text-align:center}
+.actions{display:flex;gap:8px;margin-top:9px}
+.btn-plate{flex:1;background:linear-gradient(180deg,#4ea864,#337a45);color:#fff;font-weight:800;padding:10px;font-size:13px;border:1px solid #7cd491}
+.btn-trash{background:#4f2420;color:#ffc4be;border:1px solid #8a3d36;font-weight:700;padding:10px 13px;font-size:12px}
+.pass{align-items:center;justify-content:space-between;background:radial-gradient(circle at 50% 0,rgba(255,196,92,.32),rgba(24,15,10,.65) 56%)}
+.lamp{width:130px;height:16px;border-radius:0 0 24px 24px;background:linear-gradient(180deg,#c9733c,#f5b95b);box-shadow:0 10px 28px rgba(255,190,82,.55);margin:-12px auto 4px}
+.plate{width:214px;height:214px;border-radius:50%;background:radial-gradient(circle at 42% 38%,#ffffff,#ece5d7 66%,#cfc4b0 74%,#f8f4ec 78%,#d4c9b5 100%);border:4px solid #e6dcc9;box-shadow:0 12px 24px rgba(0,0,0,.5);display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;padding:16px;position:relative}
+.plate .layer{transform:scale(.82);margin:-3px 0}
+.plate-empty{color:#8c7d6b;font-size:12px;font-weight:700;text-align:center;padding:14px}
+.plate-label{font-family:Georgia,serif;font-size:15px;color:#ffe2a6;text-align:center;min-height:20px}
+.bell-btn{width:100%;background:linear-gradient(180deg,#f5c451,#c97e1c);color:#2b1605;font-weight:900;font-size:14px;letter-spacing:.5px;padding:12px;border:2px solid #ffe49c;box-shadow:0 6px 14px rgba(240,184,73,.3)}
+.bell-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#1c120d;border:1px solid #c9733c;color:#ffdf9e;padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(12,8,6,.82);display:none;place-items:center;z-index:20}
+.modal.open{display:grid}
+.card{background:linear-gradient(180deg,#302119,#1e1510);border:2px solid #c9733c;border-radius:16px;padding:24px 28px;width:400px;text-align:center;box-shadow:0 20px 44px rgba(0,0,0,.65)}
+.card h2{font-family:Georgia,serif;color:#f7d58b;font-size:26px;margin-bottom:6px}
+.card p{color:#cbb29e;font-size:13px;margin-bottom:16px}
+.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+.summary div{background:#160f0c;border:1px solid #4d3527;border-radius:10px;padding:10px}
+.summary small{display:block;font-size:11px;color:#b49884}
+.summary b{font-size:22px;color:#fff3d6}
+@keyframes drop{from{opacity:0;transform:translateY(-12px) scale(1.06)}to{opacity:1;transform:none}}
+@keyframes pulse{50%{opacity:.55}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-mark">S</div>
+    <div><h1>Saffron Hearth</h1><small>Artisan Copper-Skillet Kitchen</small></div>
+  </div>
+  <div class="hud">
+    <div class="stat timer-box" id="timerBox"><label>Shift Timer</label><strong id="timerVal">02:30</strong></div>
+    <div class="stat"><label>Score</label><strong id="scoreVal">240</strong></div>
+    <div class="stat"><label>Combo</label><strong id="comboVal">x2</strong></div>
+    <div class="stat"><label>Served</label><strong id="servedVal">2</strong></div>
+    <div class="hud-btns">
+      <button class="btn-top" id="soundBtn">Sound: On</button>
+      <button class="btn-top" id="pauseBtn">Pause [P]</button>
+      <button class="btn-top" id="resetBtn">New Shift</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="backsplash">
+    <div class="rail">
+      <span class="rail-tag">Order Board</span>
+      <span class="rail-tag">Keys: Q W A S D R · Skillet E/F · Plate Enter · Serve Space</span>
+    </div>
+    <div class="orders" id="ordersEl"></div>
+  </section>
+  <section class="counter">
+    <div class="station">
+      <div class="st-title">Counter Ingredients <span>Click or press key</span></div>
+      <div class="bins" id="binsEl"></div>
+      <div class="skillet-box">
+        <div class="pan" id="panEl" title="Copper Skillet [E/F]"></div>
+        <div class="sk-meta">
+          <b id="skTitle">Copper Skillet — Sizzling</b>
+          <small id="skSub">Press [E] to drop patty, [F] to add seared patty</small>
+          <div class="bar"><i id="skBar" style="width:76%"></i></div>
+        </div>
+        <button class="sk-btn" id="skBtn">Add [F]</button>
+      </div>
+    </div>
+    <div class="station">
+      <div class="st-title">Assembly Board <span>Mid-assembly station</span></div>
+      <div class="board-wrap">
+        <div class="board-badge" id="boardHint">Mid-Assembly · Building Order</div>
+        <div class="dish-stage" id="boardStage"></div>
+        <div class="board-tags" id="boardTags"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-trash" id="trashBtn">Clear [X]</button>
+        <button class="btn-plate" id="plateBtn">Move to Serve Plate [Enter]</button>
+      </div>
+    </div>
+    <div class="station pass">
+      <div class="lamp"></div>
+      <div class="st-title" style="width:100%">Service Pass <span>Ready to serve</span></div>
+      <div class="plate" id="plateEl"></div>
+      <div class="plate-label" id="plateLabel"></div>
+      <button class="bell-btn" id="serveBtn">RING BELL &amp; SERVE [Space]</button>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toastEl"></div>
+<div class="modal" id="modalEl">
+  <div class="card">
+    <h2>Shift Complete!</h2>
+    <p>The dinner rush is wrapped at Saffron Hearth.</p>
+    <div class="summary">
+      <div><small>Final Score</small><b id="mScore">0</b></div>
+      <div><small>Dishes Served</small><b id="mServed">0</b></div>
+      <div><small>Best Combo</small><b id="mCombo">x1</b></div>
+      <div><small>Orders Missed</small><b id="mMissed">0</b></div>
+    </div>
+    <button class="bell-btn" id="againBtn">Start Fresh Shift</button>
+  </div>
+</div>
+<script>
+const ING = {
+  bun:{name:"Brioche Bun",key:"Q",cls:"l-bun",swatch:"linear-gradient(180deg,#e9ae58,#c47d2f)",sub:"Toasted base"},
+  flatbread:{name:"Flatbread",key:"W",cls:"l-flatbread",swatch:"linear-gradient(135deg,#dfba7c,#b47e42)",sub:"Hearth-baked"},
+  greens:{name:"Crispy Greens",key:"A",cls:"l-greens",swatch:"linear-gradient(180deg,#68c768,#2d7d38)",sub:"Garden leaves"},
+  tomato:{name:"Tomato",key:"S",cls:"l-tomato",swatch:"linear-gradient(180deg,#f05344,#c42b1f)",sub:"Heirloom slice"},
+  cheddar:{name:"Aged Cheddar",key:"D",cls:"l-cheddar",swatch:"linear-gradient(180deg,#ffd44d,#e39a19)",sub:"Sharp melt"},
+  sauce:{name:"Saffron Glaze",key:"R",cls:"l-sauce",swatch:"linear-gradient(90deg,#f7a428,#ffd84d)",sub:"House finish"},
+  seared:{name:"Seared Patty",key:"F",cls:"l-seared",swatch:"#5a2c1c",sub:"From skillet"}
+};
+const RECIPES = [
+  {name:"Saffron Bistro Melt",pts:160,items:["bun","greens","seared","cheddar","sauce"]},
+  {name:"Copper Ember Stack",pts:150,items:["bun","seared","tomato","cheddar"]},
+  {name:"Hearth Garden Flatbread",pts:140,items:["flatbread","greens","tomato","cheddar","sauce"]},
+  {name:"Golden Skillet Wrap",pts:155,items:["flatbread","seared","greens","sauce"]},
+  {name:"Double Hearth Burger",pts:190,items:["bun","seared","cheddar","seared","sauce"]}
+];
+const $ = id => document.getElementById(id);
+let S, ac, soundOn = true, toastT;
+function beep(freq, dur, type="triangle", vol=.08){
+  if(!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==="suspended") ac.resume();
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    g.gain.exponentialRampToValueAtTime(.001, ac.currentTime+dur);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+dur);
+  }catch(_){}
+}
+function toast(msg){
+  const t=$("toastEl"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1800);
+}
+const sig = arr => [...arr].sort().join("|");
+function matchRecipe(items){
+  const k = sig(items);
+  return RECIPES.find(r => sig(r.items) === k) || null;
+}
+function mkOrder(rIdx, ttl=58, maxTtl=65){
+  const r = RECIPES[rIdx % RECIPES.length];
+  return {id:++S.oid, recipe:r, ttl, maxTtl};
+}
+function initState(){
+  S = {
+    oid:100, time:150, score:240, combo:2, bestCombo:2, served:2, missed:0, paused:false, over:false,
+    spawnCd:14,
+    orders:[],
+    board:["bun","seared","tomato"],
+    plate:["bun","greens","seared","cheddar","sauce"],
+    skillet:{state:"cooking", prog:76, hold:0}
+  };
+  S.orders = [mkOrder(0,52,65), mkOrder(1,59,65), mkOrder(2,64,65)];
+  $("modalEl").classList.remove("open");
+  $("pauseBtn").textContent = "Pause [P]";
+  renderAll();
+}
+function addIngredient(id){
+  if(S.paused || S.over) return;
+  if(S.board.length >= 6){ toast("Board is full — Plate [Enter] or Clear [X]"); beep(180,.12,"sawtooth"); return; }
+  S.board.push(id); beep(420 + S.board.length*45, .07); renderBoard(); renderOrders();
+}
+function skilletAction(forceDrop=false){
+  if(S.paused || S.over) return;
+  const sk = S.skillet;
+  if(sk.state==="empty"){
+    sk.state="cooking"; sk.prog=0; sk.hold=0; beep(220,.1,"sawtooth",.05); toast("Patty sizzling on copper skillet");
+  } else if(sk.state==="ready" && !forceDrop){
+    if(S.board.length >= 6){ toast("Assembly board full!"); return; }
+    S.board.push("seared"); sk.state="empty"; sk.prog=0; sk.hold=0; beep(580,.09); toast("Added Seared Patty to assembly board");
+    renderBoard(); renderOrders();
+  } else if(sk.state==="burnt"){
+    sk.state="empty"; sk.prog=0; sk.hold=0; beep(150,.12,"sawtooth"); toast("Cleared charred patty from skillet");
+  } else if(sk.state==="cooking"){
+    toast("Still searing… wait for the golden glow!"); beep(260,.06);
+  }
+  renderSkillet();
+}
+function plateDish(){
+  if(S.paused || S.over) return;
+  if(!S.board.length){ toast("Stack ingredients on the board first"); return; }
+  if(S.plate.length){ toast("Serve the plated dish [Space] first!"); beep(200,.1,"sawtooth"); return; }
+  S.plate = [...S.board]; S.board = [];
+  beep(520,.08); setTimeout(()=>beep(660,.1),70);
+  const rec = matchRecipe(S.plate);
+  toast(rec ? `${rec.name} plated — hit Space to serve!` : "Custom dish plated — check the order tickets!");
+  renderAll();
+}
+function servePlate(){
+  if(S.paused || S.over || !S.plate.length) return;
+  const pSig = sig(S.plate);
+  const idx = S.orders.findIndex(o => sig(o.recipe.items) === pSig);
+  if(idx >= 0){
+    const o = S.orders.splice(idx,1)[0];
+    const bonus = Math.round(o.ttl * 1.2) + S.combo * 20;
+    const gain = o.recipe.pts + bonus;
+    S.score += gain; S.served++; S.combo++; S.bestCombo = Math.max(S.bestCombo, S.combo);
+    S.plate = [];
+    beep(880,.14,"sine",.1); setTimeout(()=>beep(1175,.2,"sine",.09),90);
+    toast(`Served ${o.recipe.name}! +${gain} pts (Combo x${S.combo})`);
+    if(S.orders.length < 3) S.orders.push(mkOrder(Math.floor(Math.random()*RECIPES.length), 62, 65));
+  } else {
+    S.combo = 1; S.plate = []; S.score = Math.max(0, S.score - 25);
+    beep(160,.22,"sawtooth",.09);
+    toast("No matching ticket! Dish discarded (-25 pts)");
+  }
+  renderAll();
+}
+function clearBoard(){
+  if(S.paused || S.over || !S.board.length) return;
+  S.board = []; beep(210,.09,"triangle"); toast("Assembly board cleared"); renderBoard(); renderOrders();
+}
+function renderBins(){
+  const keys = ["bun","flatbread","greens","tomato","cheddar","sauce"];
+  $("binsEl").innerHTML = keys.map(k => {
+    const g = ING[k];
+    return `<button class="bin" data-ing="${k}"><span class="key">${g.key}</span><span class="icon" style="background:${g.swatch}"></span><span class="bin-info"><b>${g.name}</b><small>${g.sub}</small></span></button>`;
+  }).join("");
+  $("binsEl").querySelectorAll(".bin").forEach(b => b.onclick = () => addIngredient(b.dataset.ing));
+}
+function renderOrders(){
+  const pSig = S.plate.length ? sig(S.plate) : "";
+  const bCounts = {}; S.board.forEach(x => bCounts[x]=(bCounts[x]||0)+1);
+  $("ordersEl").innerHTML = S.orders.map(o => {
+    const pct = Math.max(0, Math.min(100, (o.ttl / o.maxTtl)*100));
+    const barCls = pct < 25 ? "crit" : pct < 50 ? "warn" : "";
+    const matched = pSig && pSig === sig(o.recipe.items);
+    const used = {...bCounts};
+    const chips = o.recipe.items.map(it => {
+      const has = used[it] > 0; if(has) used[it]--;
+      return `<span class="chip ${has?"done":""}">${ING[it].name}</span>`;
+    }).join("");
+    return `<article class="ticket ${matched?"matched":""}">
+      <div><div class="t-head"><h3>${o.recipe.name}</h3><span class="t-price">+${o.recipe.pts}</span></div>
+      <div class="t-list">${chips}</div></div>
+      <div><div class="bar"><i class="${barCls}" style="width:${pct.toFixed(1)}%"></i></div></div>
+    </article>`;
+  }).join("");
+}
+function renderBoard(){
+  const stage = $("boardStage");
+  if(!S.board.length){
+    stage.innerHTML = `<div style="color:#fff0d4;opacity:.75;font-size:13px;font-weight:600">Select counter ingredients to assemble a dish</div>`;
+    $("boardTags").textContent = "Empty butcher block";
+    $("boardHint").textContent = "Ready for Prep";
+  } else {
+    stage.innerHTML = S.board.map(id => `<div class="layer ${ING[id].cls}" title="${ING[id].name}"></div>`).join("");
+    $("boardTags").textContent = S.board.map(id => ING[id].name).join(" + ");
+    const rec = matchRecipe(S.board);
+    $("boardHint").textContent = rec ? `Complete: ${rec.name} — Press Enter` : `Mid-Assembly · ${S.board.length} layer${S.board.length>1?"s":""}`;
+  }
+}
+function renderPlate(){
+  const p = $("plateEl");
+  if(!S.plate.length){
+    p.innerHTML = `<div class="plate-empty">No plated dish yet.<br>Press [Enter] when ready.</div>`;
+    $("plateLabel").textContent = "Waiting at the pass";
+    $("serveBtn").disabled = true;
+  } else {
+    p.innerHTML = S.plate.map(id => `<div class="layer ${ING[id].cls}"></div>`).join("");
+    const rec = matchRecipe(S.plate);
+    const matchesOrder = S.orders.some(o => sig(o.recipe.items) === sig(S.plate));
+    $("plateLabel").textContent = rec ? `${rec.name}${matchesOrder?" · Order Ready!":""}` : "Unmatched Assembly";
+    $("serveBtn").disabled = false;
+  }
+}
+function renderSkillet(){
+  const sk = S.skillet, pan = $("panEl"), bar = $("skBar"), btn = $("skBtn");
+  pan.className = "pan" + (sk.state==="cooking"||sk.state==="ready" ? " hot" : "");
+  if(sk.state==="empty"){
+    pan.innerHTML = ""; $("skTitle").textContent = "Copper Skillet — Ready";
+    $("skSub").textContent = "Press [E] or click pan to sear a patty";
+    bar.style.width = "0%"; bar.className = ""; btn.textContent = "Sear [E]";
+  } else if(sk.state==="cooking"){
+    pan.innerHTML = `<div class="l-raw"></div>`; $("skTitle").textContent = "Copper Skillet — Sizzling";
+    $("skSub").textContent = `Searing patty… ${Math.round(sk.prog)}%`;
+    bar.style.width = sk.prog + "%"; bar.className = "warn"; btn.textContent = "Searing…";
+  } else if(sk.state==="ready"){
+    pan.innerHTML = `<div class="l-cooked"></div>`; $("skTitle").textContent = "Seared Patty Ready!";
+    $("skSub").textContent = "Press [F] to stack onto assembly board";
+    bar.style.width = "100%"; bar.className = ""; btn.textContent = "Add [F]";
+  } else {
+    pan.innerHTML = `<div class="l-burnt"></div>`; $("skTitle").textContent = "Patty Charred!";
+    $("skSub").textContent = "Click skillet or press [F] to clear";
+    bar.style.width = "100%"; bar.className = "crit"; btn.textContent = "Clear [F]";
+  }
+}
+function renderHud(){
+  const m = String(Math.floor(S.time/60)).padStart(2,"0");
+  const s = String(Math.ceil(S.time%60)%60).padStart(2,"0");
+  $("timerVal").textContent = `${S.time<=0?"00":m}:${S.time<=0?"00":s}`;
+  $("timerBox").classList.toggle("low", S.time <= 25 && S.time > 0);
+  $("scoreVal").textContent = S.score;
+  $("comboVal").textContent = "x" + S.combo;
+  $("servedVal").textContent = S.served;
+}
+function renderAll(){ renderHud(); renderOrders(); renderBoard(); renderPlate(); renderSkillet(); }
+let lastT = performance.now();
+function tick(now){
+  const dt = Math.min(.2, (now - lastT)/1000); lastT = now;
+  if(!S.paused && !S.over){
+    S.time = Math.max(0, S.time - dt);
+    if(S.skillet.state==="cooking"){
+      S.skillet.prog += dt * 42;
+      if(S.skillet.prog >= 100){ S.skillet.prog = 100; S.skillet.state = "ready"; beep(740,.08); }
+    } else if(S.skillet.state==="ready"){
+      S.skillet.hold += dt;
+      if(S.skillet.hold >= 12){ S.skillet.state = "burnt"; beep(140,.2,"sawtooth"); toast("Skillet patty burned!"); }
+    }
+    S.orders.forEach(o => o.ttl -= dt);
+    const expired = S.orders.filter(o => o.ttl <= 0);
+    if(expired.length){
+      S.orders = S.orders.filter(o => o.ttl > 0);
+      S.missed += expired.length; S.combo = 1;
+      toast("An order timed out!"); beep(170,.2,"sawtooth");
+    }
+    S.spawnCd -= dt;
+    if((S.spawnCd <= 0 && S.orders.length < 4) || S.orders.length < 2){
+      S.orders.push(mkOrder(Math.floor(Math.random()*RECIPES.length), 62, 65));
+      S.spawnCd = 15;
+    }
+    if(S.time <= 0){
+      S.over = true;
+      $("mScore").textContent = S.score; $("mServed").textContent = S.served;
+      $("mCombo").textContent = "x" + S.bestCombo; $("mMissed").textContent = S.missed;
+      $("modalEl").classList.add("open");
+      beep(660,.15); setTimeout(()=>beep(880,.25),140);
+    }
+    renderHud(); renderOrders(); renderSkillet();
+  }
+  requestAnimationFrame(tick);
+}
+$("panEl").onclick = () => skilletAction(false);
+$("skBtn").onclick = () => skilletAction(false);
+$("plateBtn").onclick = plateDish;
+$("trashBtn").onclick = clearBoard;
+$("serveBtn").onclick = servePlate;
+$("againBtn").onclick = initState;
+$("resetBtn").onclick = initState;
+$("soundBtn").onclick = () => { soundOn = !soundOn; $("soundBtn").textContent = `Sound: ${soundOn?"On":"Off"}`; };
+$("pauseBtn").onclick = () => {
+  if(S.over) return;
+  S.paused = !S.paused; $("pauseBtn").textContent = S.paused ? "Resume [P]" : "Pause [P]";
+  toast(S.paused ? "Shift Paused" : "Shift Resumed");
+};
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  const map = {q:"bun",w:"flatbread",a:"greens",s:"tomato",d:"cheddar",r:"sauce"};
+  if(map[k]){ addIngredient(map[k]); }
+  else if(k==="e"){ skilletAction(true); }
+  else if(k==="f"){ skilletAction(false); }
+  else if(e.key==="Enter"){ e.preventDefault(); plateDish(); }
+  else if(e.code==="Space"){ e.preventDefault(); servePlate(); }
+  else if(k==="x"||e.key==="Backspace"){ clearBoard(); }
+  else if(k==="p"){ $("pauseBtn").click(); }
+});
+renderBins();
+initState();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
